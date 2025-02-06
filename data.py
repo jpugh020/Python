@@ -2,17 +2,47 @@ import pandas as pd
 import os
 from time import sleep
 import getpass
+from platform import system
 
-#fileName = input("Welcome to the Jenn-Tron 5000. Please enter the name of a document you would like to Reist-ify: ")
+platform = system()
+user = getpass.getuser()
+
+if platform:
+    if platform == "Windows":
+        path = f'C:\\Users\\{user}\\'
+        sudo = 'C:\\'
+    elif platform == "Linux":
+        path = f'~/Documents'
+
+
+
+fileName = input("Welcome to the Jenn-Tron 5000. Please enter the name of a document you would like to Reist-ify: ")
+
+for root, dirs, files in os.walk(path):
+    print("Root:", root)
+    # print("Directories:", dirs)
+    # print("Files:", files)
+    fileLen = len(files)
+    if fileLen != 0:
+        for file in files:
+            if file == fileName:
+                print(f"Found at {root}")
+                break
+    else: 
+        print("file not found")
+
+    
 #print()
 
 # for root, dir, files in os.walk('/mnt/c'):
 #     if fileName in files:
 #         print("Found file")
 
-sheet = pd.read_excel('/mnt/c/Users/jacob.pugh/Downloads/Pugh Data.xlsx' )
+sheet = pd.read_excel('C:\\Users\\jacob.pugh\\Downloads\\Pugh Data.xlsx')
 
-user = getpass.getuser()
+# pd.read_excel('/mnt/c/Users/jacob.pugh/Downloads/Pugh Data.xlsx' ) or
+
+
 
 print(user)
 
