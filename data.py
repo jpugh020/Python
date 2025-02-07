@@ -3,33 +3,43 @@ import os
 from time import sleep
 import getpass
 from platform import system
+import re
+
+import sys
+
+
+
+
 
 platform = system()
-user = getpass.getuser()
+user = getpass.getuser() 
+regex = r"^\s\d{2}$"
 
 if platform:
     if platform == "Windows":
-        path = f'C:\\Users\\{user}\\'
+        path = f'C:\\Users\\{user}\\Downloads\\'
         sudo = 'C:\\'
     elif platform == "Linux":
         path = f'~/Documents'
 
 
 
-fileName = input("Welcome to the Jenn-Tron 5000. Please enter the name of a document you would like to Reist-ify: ")
-
+fileName = input("Welcome to the Jenn-Tron 5000. Please enter the name of a document you would like to Reist-ify, including the filetype at the end (e.g. .csv or .xlsx): ")
+filecount = 0
 for root, dirs, files in os.walk(path):
-    print("Root:", root)
-    # print("Directories:", dirs)
-    # print("Files:", files)
     fileLen = len(files)
     if fileLen != 0:
-        for file in files:
-            if file == fileName:
-                print(f"Found at {root}")
-                break
-    else: 
-        print("file not found")
+        if fileName in files:
+            print(f"Found at {root}")
+            path = root + fileName
+            break
+        else:
+            filecount += 1
+            print(f"Checked {filecount} files\r", end="")
+            
+
+
+    
 
     
 #print()
@@ -38,19 +48,19 @@ for root, dirs, files in os.walk(path):
 #     if fileName in files:
 #         print("Found file")
 
-sheet = pd.read_excel('C:\\Users\\jacob.pugh\\Downloads\\Pugh Data.xlsx')
+sheet = pd.read_excel(path)
 
 # pd.read_excel('/mnt/c/Users/jacob.pugh/Downloads/Pugh Data.xlsx' ) or
 
 
 
-print(user)
+
 
 # writer=pd.ExcelWriter("C:\\Users\\"+user+"\\Documents\\Jenn-Tron5000", engine='xlsxwriter')
 
 
 
-cell = sheet.iloc[2, 0]
+cell = sheet.iloc[0, 13]
 
 
 col = sheet['1wbgra15.p']
@@ -65,18 +75,35 @@ data = sheet.columns[:81]
 schedule = []
 
 
+lastnames = []
+
+firstnames = []
+
+classSize = []
+
 for cols in data:
     i = 0
     length = len(sheet[cols])
     col = sheet[cols]
     while (i < length):
-        if col[i] != 'NaN':
+        if col[i] != 'nan':
             if type(col[i]) == str and 'Period: ' in col[i]:
                 # print(f"found {col[i]} at col[{i}]")
                 schedule.append(col[i])
                 #new.columns = schedule
+            if (type(col[i]) == str and bool(re.fullmatch(regex, col[i]))):
+                classSize.append(col[i])
+                
+            elif type(col[i]) == str and 'Last Name' in col[i]: 
+                
+                lastnames.append((col[i+1]))
+            elif type(col[i]) == str and 'First Name' in col[i]:
+                firstnames.append(col[i+1])             
+            
         i += 1
 print(schedule)
+print(lastnames, "\n", firstnames)
+print(classSize)
 
 new = pd.DataFrame(columns=schedule)
 
@@ -96,6 +123,6 @@ students = []
 
 
 # print(sheet)
-# print(cell)
+print(cell)
 # print(int(col[8]))
 # print(data)
