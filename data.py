@@ -14,6 +14,7 @@ import sys
 platform = system()
 user = getpass.getuser() 
 regex = r"^\s\d{2}$"
+category = r"^[TEST]$"
 
 if platform:
     if platform == "Windows":
@@ -93,6 +94,9 @@ for cols in data:
                 #new.columns = schedule
             if (type(col[i]) == str and bool(re.fullmatch(regex, col[i]))):
                 classSize.append(col[i])
+            if (type(col[i]) == str and bool(re.fullmatch(category, col[i]))):
+                print("found")
+
                 
             elif type(col[i]) == str and 'Last Name' in col[i]: 
                 
@@ -103,7 +107,11 @@ for cols in data:
         i += 1
 print(schedule)
 print(lastnames, "\n", firstnames)
-print(classSize)
+newClassSize = []
+for i in range(len(classSize)):
+    if classSize[i] == ' 01' and classSize[i-1]:
+        newClassSize.append(int(classSize[i- 1])) 
+print(newClassSize)
 
 new = pd.DataFrame(columns=schedule)
 
@@ -123,6 +131,6 @@ students = []
 
 
 # print(sheet)
-print(cell)
+# print(cell)
 # print(int(col[8]))
 # print(data)
