@@ -94,6 +94,7 @@ for cols in data:
                 #new.columns = schedule
             if (type(col[i]) == str and bool(re.fullmatch(regex, col[i]))):
                 classSize.append(col[i])
+
             if (type(col[i]) == str and bool(re.fullmatch(category, col[i]))):
                 print("found")
 
@@ -109,8 +110,11 @@ print(schedule)
 print(lastnames, "\n", firstnames)
 newClassSize = []
 for i in range(len(classSize)):
-    if classSize[i] == ' 01' and classSize[i-1]:
+    if classSize[i] == ' 01' and classSize[i-1] and i != 0:
         newClassSize.append(int(classSize[i- 1])) 
+        print(newClassSize)
+    elif i == len(classSize) - 1:
+        newClassSize.append(int(classSize[i]))
 print(newClassSize)
 
 new = pd.DataFrame(columns=schedule)
