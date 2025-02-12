@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import os
 from time import sleep
 import getpass
@@ -14,7 +15,8 @@ import sys
 platform = system()
 user = getpass.getuser() 
 regex = r"^\s\d{2}$"
-category = r"^[TEST]$"
+test = r"^TEST$"
+clas = r"^CLAS"
 
 if platform:
     if platform == "Windows":
@@ -50,8 +52,9 @@ for root, dirs, files in os.walk(path):
 #         print("Found file")
 
 sheet = pd.read_excel(path)
-
+sheet = sheet.dropna(axis=1, how="all")
 # pd.read_excel('/mnt/c/Users/jacob.pugh/Downloads/Pugh Data.xlsx' ) or
+
 
 
 
@@ -67,14 +70,16 @@ cell = sheet.iloc[0, 13]
 col = sheet['1wbgra15.p']
 
 
-period = sheet['Unnamed: 5']
+
+#data = sheet[:81]
 
 
+tests = []
+classes={}
 
-data = sheet.columns[:81]
+catRows = {}
 
-schedule = []
-
+grades = {}
 
 lastnames = []
 
@@ -82,43 +87,41 @@ firstnames = []
 
 classSize = []
 
-for cols in data:
-    i = 0
-    length = len(sheet[cols])
+start = 0
+stop = 0
+
+for cols in sheet:
     col = sheet[cols]
-    while (i < length):
-        if col[i] != 'nan':
-            if type(col[i]) == str and 'Period: ' in col[i]:
-                # print(f"found {col[i]} at col[{i}]")
-                schedule.append(col[i])
-                #new.columns = schedule
-            if (type(col[i]) == str and bool(re.fullmatch(regex, col[i]))):
-                classSize.append(col[i])
-
-            if (type(col[i]) == str and bool(re.fullmatch(category, col[i]))):
-                print("found")
+    for i, item in enumerate(col):
+        if item != 'nan':
+            if col.name=="1wbgra15.p" and type(item) == str and r'Teacher' in item:
+                start = i
+                print(start)
+            if col.name=="1wbgra15.p" and type(item) == str and r"^\s\d{2}" in item and col[i+1] == np.nan and i > start:
+                stop = i
+                print(stop)
 
                 
-            elif type(col[i]) == str and 'Last Name' in col[i]: 
                 
-                lastnames.append((col[i+1]))
-            elif type(col[i]) == str and 'First Name' in col[i]:
-                firstnames.append(col[i+1])             
+
+           
+            
+                
+                 
             
         i += 1
-print(schedule)
 print(lastnames, "\n", firstnames)
-newClassSize = []
-for i in range(len(classSize)):
-    if classSize[i] == ' 01' and classSize[i-1] and i != 0:
-        newClassSize.append(int(classSize[i- 1])) 
-    elif i == len(classSize) - 1:
-        newClassSize.append(int(classSize[i]))
-print(newClassSize)
+temp = sheet.loc[2 : 31]
+print(temp)
 
-new = pd.DataFrame(columns=schedule)
+print(temp.iloc[1, 1])
 
-print(new)
+
+# print(tests)
+
+# new = pd.DataFrame(columns=schedule)
+
+# print(new)
 
 
 
@@ -133,7 +136,7 @@ print(new)
 students = []
 
 
-# print(sheet)
-# print(cell)
+
+# print(sheet.notna())
 # print(int(col[8]))
 # print(data)
