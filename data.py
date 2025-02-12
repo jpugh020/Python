@@ -5,6 +5,7 @@ from time import sleep
 import getpass
 from platform import system
 import re
+import openpyxl
 
 import sys
 
@@ -60,47 +61,49 @@ sheet = sheet.dropna(axis=1, how="all")
 
 
 
-# writer=pd.ExcelWriter("C:\\Users\\"+user+"\\Documents\\Jenn-Tron5000", engine='xlsxwriter')
+writer=pd.ExcelWriter("C:\\Users\\"+user+"\\Documents\\output.xlsx", engine='openpyxl')
 
 
 
-cell = sheet.iloc[0, 13]
 
 
-col = sheet['1wbgra15.p']
+
 
 
 
 #data = sheet[:81]
 
 
-tests = []
-classes={}
-
-catRows = {}
-
-grades = {}
-
-lastnames = []
-
-firstnames = []
-
-classSize = []
 
 start = 0
 stop = 0
-
+sheetCount = 0
+periods = []
 for cols in sheet:
     col = sheet[cols]
+    
     for i, item in enumerate(col):
-        if item != 'nan':
+        if i == len(col) - 1:
+            next = col[i]
+        else:
+            next = col[i+1]
+        if pd.notna(item):
             if col.name=="1wbgra15.p" and type(item) == str and r'Teacher' in item:
                 start = i
                 print(start)
-            if col.name=="1wbgra15.p" and type(item) == str and r"^\s\d{2}" in item and col[i+1] == np.nan and i > start:
+            if col.name=="1wbgra15.p" and type(item) == str and re.fullmatch(regex, item) and i > start and (pd.isna(next) or i == len(col) - 1 ):
                 stop = i
-                print(stop)
-
+                sheetCount += 1
+                temp = sheet[start:stop]
+                temp.dropna(axis=1, how='all')
+                for cols in temp:
+                    col = temp[cols]
+                    for item in col:
+                        if re.fullmatch(r"^CLAS", item) and type(item) == str:
+                            temp.drop(cols)
+                temp.to_excel(f"C:\\Users\\{user}\\Documents\\output.xlsx", header=False, index=False)
+                
+        
                 
                 
 
@@ -110,11 +113,11 @@ for cols in sheet:
                  
             
         i += 1
-print(lastnames, "\n", firstnames)
-temp = sheet.loc[2 : 31]
-print(temp)
 
-print(temp.iloc[1, 1])
+# temp = sheet.loc[2 : 31]
+# print(temp)
+
+print(pd.isna(temp.iloc[1, 1]))
 
 
 # print(tests)
