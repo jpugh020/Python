@@ -5,7 +5,7 @@ from time import sleep
 import getpass
 from platform import system
 import re
-import openpyxl
+from openpyxl import load_workbook
 
 import sys
 
@@ -18,6 +18,7 @@ user = getpass.getuser()
 regex = r"^\s\d{2}$"
 test = r"^TEST$"
 clas = r"^CLAS"
+docs = f"C:\\Users\\{user}\\Documents"
 
 if platform:
     if platform == "Windows":
@@ -40,6 +41,9 @@ for root, dirs, files in os.walk(path):
         else:
             filecount += 1
             print(f"Checked {filecount} files\r", end="")
+
+
+
             
 
 
@@ -61,7 +65,7 @@ sheet = sheet.dropna(axis=1, how="all")
 
 
 
-writer=pd.ExcelWriter("C:\\Users\\"+user+"\\Documents\\output.xlsx", engine='openpyxl')
+
 
 
 
@@ -73,12 +77,13 @@ writer=pd.ExcelWriter("C:\\Users\\"+user+"\\Documents\\output.xlsx", engine='ope
 
 #data = sheet[:81]
 
-
+savePath = f"C:\\Users\\{user}\\Documents\\"
 
 start = 0
 stop = 0
 sheetCount = 0
 periods = []
+teacher = ''
 for cols in sheet:
     col = sheet[cols]
     
@@ -88,31 +93,49 @@ for cols in sheet:
         else:
             next = col[i+1]
         if pd.notna(item):
-            if col.name=="1wbgra15.p" and type(item) == str and r'Teacher' in item:
+            if col.name == "1wbgra15.p" and type(item) == str and 'Teacher' in item:
                 start = i
                 print(start)
-            if col.name=="1wbgra15.p" and type(item) == str and re.fullmatch(regex, item) and i > start and (pd.isna(next) or i == len(col) - 1 ):
+            if col.name == "1wbgra15.p" and type(item) == str and re.fullmatch(regex, item) and i > start and (pd.isna(next) or i == len(col) - 1):
                 stop = i
                 sheetCount += 1
                 temp = sheet[start:stop]
-                temp.dropna(axis=1, how='all')
-                for cols in temp:
-                    col = temp[cols]
-                    for item in col:
-                        if re.fullmatch(r"^CLAS", item) and type(item) == str:
-                            temp.drop(cols)
-                temp.to_excel(f"C:\\Users\\{user}\\Documents\\output.xlsx", header=False, index=False)
-                
-        
-                
-                
+                # temp.dropna(axis=1, how='all')
+                for temp_cols in temp:
+                    temp_col = temp[temp_cols]
+                    for temp_item in temp_col:
+                        if type(temp_item) == str and "Period: " in temp_item:
+                            sheetName = temp_item[:6]
+                            sheetName += temp_item[7:]
+                            
+                            print(sheetName)
+                        if type(temp_item) == str and "Teacher: " in temp_item and savePath == f"C:\\Users\\{user}\\Documents\\":
+                            teacher = temp_item[9:]
+                            savePath += teacher + ".xlsx"
+                            for root, dirs, files in os.walk(docs):
+                                fileLen = len(files)
+                                if fileLen != 0:
+                                    if teacher + ".xlsx" in files:
+                                        exists = True
+                                        break
+                                    else:
+                                        exists = False
+                                        
+                if not exists:
+                    temp.to_excel(savePath, header=False, index=False, sheet_name=sheetName)
+                else:
+                    book = load_workbook(savePath)
+                    writer = pd.ExcelWriter(savePath, engine='openpyxl')
+                    writer.book = book
+                    temp.to_excel(writer, header=False, index=False, sheet_name=sheetName)
+                    
+                    
 
-           
-            
-                
-                 
-            
-        i += 1
+                # Reset start and stop for the next iteration
+                start = 0
+                stop = 0
+
+writer.close()
 
 # temp = sheet.loc[2 : 31]
 # print(temp)
