@@ -120,7 +120,7 @@ for root, dirs, files in os.walk(docs):
     fileLen = len(files)
     if fileLen != 0:
         if teacher + ".xlsx" in files:
-            
+            book = openpyxl.load_workbook(savePath)
             break
         else:
             book = openpyxl.Workbook()
@@ -133,10 +133,10 @@ for root, dirs, files in os.walk(docs):
                 # Reset start and stop for the next iteration
 
 writer = pd.ExcelWriter(savePath, engine='openpyxl', mode='a')
-writer.book = openpyxl.load_workbook(savePath)
+writer.workbook = book
 for index, (key, value) in enumerate(dfs.items()):
-    value.to_excel(writer, sheet_name=key)
-
+    value.to_excel(writer, index=False, header=False, sheet_name=key)
+del book['Sheet']
 writer.close()
 
 # temp = sheet.loc[2 : 31]
