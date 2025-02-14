@@ -18,7 +18,6 @@ import sys
 platform = system()
 user = getpass.getuser() 
 regex = r"^\s\d{2}$"
-test = r"^TEST$"
 clas = r"^CLAS"
 docs = f"C:\\Users\\{user}\\Documents"
 
@@ -89,6 +88,7 @@ for cols in sheet:
                             dropVals.append(temp_cols)
                         if type(temp_item) == str and "Teacher: " in temp_item and savePath == f"C:\\Users\\{user}\\Documents\\":
                             teacher = temp_item[9:]
+                            teacher = teacher.title()
                             savePath += teacher + ".xlsx"
                 drops[sheetName] = dropVals    
                 dropVals = []
@@ -106,13 +106,6 @@ for root, dirs, files in os.walk(docs):
             book = openpyxl.Workbook()
             book.save(savePath)
             
-
-                    
-                    
-
-
-
-
 writer = pd.ExcelWriter(savePath, engine='openpyxl', mode='a')
 try:
     writer.workbook = book
@@ -128,21 +121,3 @@ writer.close()
 book = openpyxl.load_workbook(savePath)
 del book['Sheet']
 book.save(savePath)
-
-
-
-
-
-
-
-
-
-
-
-students = []
-
-
-
-# print(sheet.notna())
-# print(int(col[8]))
-# print(data)
