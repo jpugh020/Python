@@ -5,7 +5,8 @@ from time import sleep
 import getpass
 from platform import system
 import re
-from openpyxl import load_workbook
+import openpyxl
+from pathlib import Path
 
 import sys
 
@@ -82,7 +83,7 @@ savePath = f"C:\\Users\\{user}\\Documents\\"
 start = 0
 stop = 0
 sheetCount = 0
-periods = []
+dfs = {}
 teacher = ''
 for cols in sheet:
     col = sheet[cols]
@@ -107,33 +108,34 @@ for cols in sheet:
                         if type(temp_item) == str and "Period: " in temp_item:
                             sheetName = temp_item[:6]
                             sheetName += temp_item[7:]
+                            dfs.update({sheetName : temp})
                             
                             print(sheetName)
                         if type(temp_item) == str and "Teacher: " in temp_item and savePath == f"C:\\Users\\{user}\\Documents\\":
                             teacher = temp_item[9:]
                             savePath += teacher + ".xlsx"
-                            for root, dirs, files in os.walk(docs):
-                                fileLen = len(files)
-                                if fileLen != 0:
-                                    if teacher + ".xlsx" in files:
-                                        exists = True
-                                        break
-                                    else:
-                                        exists = False
-                                        
-                if not exists:
-                    temp.to_excel(savePath, header=False, index=False, sheet_name=sheetName)
-                else:
-                    book = load_workbook(savePath)
-                    writer = pd.ExcelWriter(savePath, engine='openpyxl')
-                    writer.book = book
-                    temp.to_excel(writer, header=False, index=False, sheet_name=sheetName)
+                start = 0
+                stop = 0
+for root, dirs, files in os.walk(docs):
+    fileLen = len(files)
+    if fileLen != 0:
+        if teacher + ".xlsx" in files:
+            
+            break
+        else:
+            book = openpyxl.Workbook()
+            book.save(savePath)
+            
+
                     
                     
 
                 # Reset start and stop for the next iteration
-                start = 0
-                stop = 0
+
+writer = pd.ExcelWriter(savePath, engine='openpyxl', mode='a')
+writer.book = openpyxl.load_workbook(savePath)
+for index, (key, value) in enumerate(dfs.items()):
+    value.to_excel(writer, sheet_name=key)
 
 writer.close()
 
