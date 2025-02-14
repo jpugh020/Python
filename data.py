@@ -7,6 +7,7 @@ from platform import system
 import re
 import openpyxl
 from pathlib import Path
+import zipfile
 
 import sys
 
@@ -42,49 +43,20 @@ for root, dirs, files in os.walk(path):
         else:
             filecount += 1
             print(f"Checked {filecount} files\r", end="")
-
-
-
-            
-
-
-    
-
-    
-#print()
-
-# for root, dir, files in os.walk('/mnt/c'):
-#     if fileName in files:
-#         print("Found file")
-
 sheet = pd.read_excel(path)
 sheet = sheet.dropna(axis=1, how="all")
-# pd.read_excel('/mnt/c/Users/jacob.pugh/Downloads/Pugh Data.xlsx' ) or
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#data = sheet[:81]
-
 savePath = f"C:\\Users\\{user}\\Documents\\"
 
 start = 0
 stop = 0
 sheetCount = 0
 dfs = {}
+dropVals = []
+drops = {}
+info = []
+year = ''
 teacher = ''
+sheetName = ''
 for cols in sheet:
     col = sheet[cols]
     
@@ -96,24 +68,32 @@ for cols in sheet:
         if pd.notna(item):
             if col.name == "1wbgra15.p" and type(item) == str and 'Teacher' in item:
                 start = i
-                print(start)
+                
             if col.name == "1wbgra15.p" and type(item) == str and re.fullmatch(regex, item) and i > start and (pd.isna(next) or i == len(col) - 1):
                 stop = i
                 sheetCount += 1
                 temp = sheet[start:stop]
-                # temp.dropna(axis=1, how='all')
-                for temp_cols in temp:
+                
+                for i, temp_cols in enumerate(temp):
                     temp_col = temp[temp_cols]
                     for temp_item in temp_col:
+                        if type(temp_item) == str and "School Year: " in temp_item or type(temp_item) == str and "Sec: " in temp_item:
+                            info.append(temp_item)
+                        
                         if type(temp_item) == str and "Period: " in temp_item:
                             sheetName = temp_item[:6]
                             sheetName += temp_item[7:]
                             dfs.update({sheetName : temp})
                             
-                            print(sheetName)
+                        if type(temp_item) == str and "CLAS" in temp_item:
+                            dropVals.append(temp_cols)
                         if type(temp_item) == str and "Teacher: " in temp_item and savePath == f"C:\\Users\\{user}\\Documents\\":
                             teacher = temp_item[9:]
                             savePath += teacher + ".xlsx"
+                drops[sheetName] = dropVals    
+                dropVals = []
+                    
+                
                 start = 0
                 stop = 0
 for root, dirs, files in os.walk(docs):
@@ -130,36 +110,34 @@ for root, dirs, files in os.walk(docs):
                     
                     
 
-                # Reset start and stop for the next iteration
+
+
 
 writer = pd.ExcelWriter(savePath, engine='openpyxl', mode='a')
-writer.workbook = book
+try:
+    writer.workbook = book
+except zipfile.BadZipFile:
+    print("Bad")
+
 for index, (key, value) in enumerate(dfs.items()):
+    value = value.drop(columns=drops.get(key))
     value.to_excel(writer, index=False, header=False, sheet_name=key)
-del book['Sheet']
+
 writer.close()
 
-# temp = sheet.loc[2 : 31]
-# print(temp)
-
-print(pd.isna(temp.iloc[1, 1]))
-
-
-# print(tests)
-
-# new = pd.DataFrame(columns=schedule)
-
-# print(new)
+book = openpyxl.load_workbook(savePath)
+del book['Sheet']
+book.save(savePath)
 
 
 
 
 
-# while (i < length):
-#     if period[i] != 'NaN':
-#         if type(period[i]) == str and 'Period: ' in period[i]:
-#             print(f"found {period[i]} at period[{i}]")
-#     i += 1
+
+
+
+
+
 
 students = []
 
