@@ -114,6 +114,7 @@ except zipfile.BadZipFile:
 
 for index, (key, value) in enumerate(dfs.items()):
     value = value.drop(columns=drops.get(key))
+    value.insert(0, )
     value.to_excel(writer, index=False, header=False, sheet_name=key)
 
 writer.close()
